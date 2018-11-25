@@ -26,8 +26,8 @@ comments: false
 
 `git remote set-url origin git@github.com:xxxxx.git` 上一步手抖了，可以用这个命令来挽回
 
+`git diff` 查看详细变化
+
 `git branch` 新建分支
 
 `git merge` 合并分支
-
-`git diff` 查看详细变化
