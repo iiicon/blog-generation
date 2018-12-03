@@ -64,4 +64,4 @@ curl -X POST -s -v -H "token: xxx" -- "https://www.baidu.com"
   3
   4 要下载的内容
 
-  具体参数查看 Chrome network 的 response headers
+  具体参数查看 Chrome network 的 response headers, 还有 Content-Type 和 Content-Length 是如此重要
