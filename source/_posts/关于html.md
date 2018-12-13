@@ -1,7 +1,7 @@
 ---
 title: 关于 HTML
 date: 2018-12-02 20:06:17
-categories: js
+categories: html
 tags: [HTML, G]
 comments: false
 ---
