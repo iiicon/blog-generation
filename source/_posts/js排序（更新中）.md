@@ -35,4 +35,28 @@ function sort2(arr) {
 }
 ```
 
-![bubble](http://p1ix9dj97.bkt.clouddn.com/QQ20181109.gif)
+[![bubblesort.gif](https://i.loli.net/2018/12/15/5c14b7b81b61f.gif)](https://i.loli.net/2018/12/15/5c14b7b81b61f.gif)
+
+### random-quickSort
+
+```
+function quickSort(arr) {
+  if (arr.length <= 1) {
+    return arr
+  }
+  var pivotIndex = Math.floor(arr.length / 2)
+  var pivot = arr.splice(pivotIndex, 1)[0]
+  var left = []
+  var right = []
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] < pivot) {
+      left.push(arr[i])
+    } else {
+      right.push(arr[i])
+    }
+  }
+  return quickSort(left).concat([pivot, quickSort(right)])
+}
+```
+
+[![quicksort.gif](https://i.loli.net/2018/12/15/5c14b72e4f8f2.gif)](https://i.loli.net/2018/12/15/5c14b72e4f8f2.gif)
