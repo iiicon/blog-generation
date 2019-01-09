@@ -1,5 +1,5 @@
 ---
-title: 玩转 VS Code
+title: VS Code 插件管理
 date: 2018-12-25 12:12:21
 tags: [vscode, compiler]
 categories: 工具

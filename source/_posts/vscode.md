@@ -5,8 +5,6 @@ tags: [vscode, compiler]
 categories: 工具
 ---
 
-
-## 玩转 VS Code
 **注：mac 版本的 vscode，其他版本需要稍微变通一下**
 > 基础语言支持还需要再研究研究
 > cmd option 好像有点交换，需要研究一下
