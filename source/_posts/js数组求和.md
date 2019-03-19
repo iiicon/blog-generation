@@ -1,5 +1,5 @@
 ---
-title: js数组求和.md
+title: js数组求和
 date: 2018-11-09 17:38:15
 tags: [code]
 categories: js-code
