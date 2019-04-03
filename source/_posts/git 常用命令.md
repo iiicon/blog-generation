@@ -35,3 +35,5 @@ comments: false
 `git rev-parse HEAD` 查看当前的 commit 记录
 
 `git reset --hard xxxx` 回滚
+
+`git push -f origin develop`  git 强制提交
