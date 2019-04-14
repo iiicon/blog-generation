@@ -31,3 +31,9 @@ comments: false
 `git merge` 合并分支
 
 `git diff` 查看详细变化
+
+`git rev-parse HEAD` 查看当前的 commit 记录
+
+`git reset --hard xxxx` 回滚
+
+`git push -f origin develop`  git 强制提交
