@@ -37,3 +37,5 @@ comments: false
 `git reset --hard xxxx` 回滚
 
 `git push -f origin develop`  git 强制提交
+
+`git push -u orgin dev` git 设置上游 --set-upstream
