@@ -1,7 +1,8 @@
 ---
 title: webpack4
 date: 2018-07-29 18:27:42
-tags: 
+categories: 前端工程化
+tags: [webpack]
 ---
 ### 安装
 突然从 webpack2 升级到了 webpack4 遇到了很多问题，安装的时候突然就冒出一个 webpack-cli 的脚手架工具，据说可以像 parcel 那样 0 配置直接开发项目，但是还是不打算直接用。
