@@ -62,7 +62,7 @@ typeof x === "number"
 padder instanceof StringPadder
 ```
 
-### 可以为 null 的类型
+### 可以为 null 的类型 
 
 **如果编译器不能够去除 null 或 undefined，你可以使用类型断言手动去除。 语法是添加 !**
 
@@ -151,6 +151,6 @@ function assertNever(x: never): never {
 #### 那么 never 是什么呢
 
 ```
-let x: never
-console.log(x === undefined) // true
+let x: never = undefined // error
+never 只表示类型
 ```
