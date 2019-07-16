@@ -38,5 +38,4 @@ Object.prototype.toLocaleString()
 Object.prototype.hasOwnProperty()
 Object.prototype.isPrototypeOf()
 Object.prototype.propertyIsEnnumerable() // 属性是否可枚举
-
 ```
