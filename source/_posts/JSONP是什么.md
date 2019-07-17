@@ -27,7 +27,7 @@ script 的 src也不受同源策略的限制，也同样有 onload 和 onerror
 #### jquery jsonp
 jquery 把这一系列操作都放到了 ajax 上，你只需指定 dataType 为 jsonp
 jquery 返回 jQuery33105114825241317853_1552671331082.call(null, 48) 类似这样的字符串
-
+文海南路
 默认约定回调函数名字就是 callback 加一串随机数组成
 
 [自己实现的jsonp](https://github.com/iiicon/node-server-demo2/commits/master)

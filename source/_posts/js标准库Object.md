@@ -2,7 +2,7 @@
 title: js标准库Object
 date: 2019-02-15 13:13:27
 categories: js
-tags: [G, js, 标准库]
+tags: [js, 标准库]
 comments: false
 ---
 
