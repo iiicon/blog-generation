@@ -119,3 +119,7 @@ const mapDispatchToProps = {
 我们在调用的时候就可以直接 `this.props.add` 来触发事件了
 
 这就是 react-redux 的使用，感叹 vuex 帮我们做了太多东西，有点香 XD
+
+### 代码仓库
+
+[react-redux](https://github.com/iiicon/react-demo-advance/blob/master/src/pages/RA6/index.jsx)

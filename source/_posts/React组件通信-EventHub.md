@@ -5,8 +5,8 @@ categories: React
 tags: [React, G]
 ---
 ### 代码仓库
-[react-eventHub](https://github.com/iiicon/react-demo-advance/blob/master/src/pages/RA2_1/index.jsx)   
-[react-redux](https://github.com/iiicon/react-demo-advance/blob/master/src/pages/RA2_2/index.jsx)
+[eventHub](https://github.com/iiicon/react-demo-advance/blob/master/src/pages/RA2_1/index.jsx)   
+[redux](https://github.com/iiicon/react-demo-advance/blob/master/src/pages/RA2_2/index.jsx)
 
 ### 任意两个组件如何通信&&发布订阅模式
 
