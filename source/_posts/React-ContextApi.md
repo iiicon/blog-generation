@@ -6,6 +6,7 @@ tags: [React, G]
 ---
 
 ### 用 context api 传值
+**ContextApi就是给组件共享一个全局的局部变量**
 
 首先需要 createContext
 
@@ -44,10 +45,13 @@ tags: [React, G]
     React.createElement(Consumer, null, function (p) {
       return React.createElement("div", null, p);
     }); 
-    
+
     // 标签里面传递函数
     function Consumer(props) {
       // console.log(props.children)
       var child = props.children(9202);
       return React.createElement("h2", null, child);
     }
+
+### 代码仓库
+[Context Api](https://github.com/iiicon/react-demo-advance/blob/master/src/pages/RA7/index.jsx)
