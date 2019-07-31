@@ -1,5 +1,5 @@
 ---
-title: react生命周期
+title: React生命周期
 date: 2019-07-28 23:40:09
 categories: React
 tags: [React, G]
