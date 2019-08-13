@@ -1,7 +1,7 @@
 ---
-title: es6
+title: ES6
 date: 2017-10-04 17:45:13
-tags: es6
+tags: ES6
 categories: js
 comments: false
 ---
