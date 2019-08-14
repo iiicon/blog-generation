@@ -1,5 +1,16 @@
 ---
 title: React-Router
+<<<<<<< HEAD
+date: 2019-07-25 20:24:59
+tags:
+---
+
+### React-
+
+    const a = 1
+
+    
+=======
 date: 2019-07-28 14:47:05
 categories: React
 tags: [React, G]
@@ -90,3 +101,4 @@ _假设为顶级路由_
 ### 代码仓库
 
 [react-router](https://github.com/iiicon/react-demo-advance/blob/master/src/pages/RA9/index.jsx)
+>>>>>>> 0f5c86daaf0d88108f03312fd6b33b88bb4ab9fc
