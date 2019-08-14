@@ -2,7 +2,7 @@
 title: js标准库Array
 date: 2019-07-16 17:05:20
 categories: js
-tags: [js, 标准库]
+tags: [js, 标准库, Array]
 comments: false
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: es6之promise
 date: 2018-11-05 19:48:35
-tags: [js]
+tags: [ES6]
 categories: js
 ---
 
