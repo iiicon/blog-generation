@@ -7,6 +7,7 @@ comments: false
 ---
 
 ### Symbol
+
 **symbol 是一种基本数据类型**
 
 > Symbol()函数会返回 symbol 类型的值，该类型具有静态属性和静态方法。它的静态属性会暴露几个内建的成员对象；它的静态方法会暴露全局的 symbol 注册，且类似于内建对象类，但作为构造函数来说它并不完整，因为它不支持语法："new Symbol()"。
@@ -15,7 +16,8 @@ comments: false
     Symbol() === Symbol() // false
 
 #### 在对象中查找 symbol 属性
-    Object.getOwnPropertySymbols() 
+
+    Object.getOwnPropertySymbols()
 
 #### 应用于私有属性
 
@@ -34,9 +36,13 @@ comments: false
 > Set 对象允许你存储任何类型的唯一值，无论是原始值或者是对象引用。
 > Set 对象是值的集合，你可以按照插入的顺序迭代它的元素。 Set 中的元素只会出现一次，即 Set 中的元素是唯一的。
 
+**WeakSet 的一个用处，是储存 DOM 节点，而不用担心这些节点从文档移除时，会引发内存泄漏。**
+
 #### 属性
 
     size
+
+有一个比较重要的是 set 没有键名，所以 key 和 value 是一样的
 
 #### 实例方法
 
@@ -47,6 +53,12 @@ comments: false
     a.entries()
     a.keys()
     a.values() // SetIterator {1 => 1, {…} => {…}}
+
+#### 实例默认可迭代
+
+    // 默认生成器函数就是 values 方法
+    Set.prototype[Symbol.iterator] === Set.prototype.values
+    Set.prototype[Symbol.iterator] === Set.prototype.keys
 
 上面三个 api 都返回迭代器对象，意味着我们可以用 for of 迭代拿到这些值
 同时也提供了 forEach 方法，和数组的用法一致
@@ -87,7 +99,24 @@ comments: false
     let a = {}
     a[o] = 1 // { [object Object]: 1 }
 
+作为构造函数，Map 也可以接受一个数组作为参数。该数组的成员是一个个表示键值对的数组
+
+    var m = new Map([
+        ['name', 'xxx'],
+        ['age', 18]
+    ])
+    
+    // 实际上是下面这个操作
+    const map = new Map();
+
+    items.forEach(
+    ([key, value]) => map.set(key, value)
+    );
+
 Map 的方法基本和 Set 一样
+
+    // 默认的迭代器函数是 entries
+    Map.prototype[Symbol.iterator] === Map.prototype.entries
 
 [Objects 和 Maps 的比较](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Map#Objects_%E5%92%8C_maps_%E7%9A%84%E6%AF%94%E8%BE%83)
 
@@ -104,6 +133,17 @@ Map 的方法基本和 Set 一样
     WeakMap.prototype.get(key)
     WeakMap.prototype.has(key)
     WeakMap.prototype.set(key, value)
+
+### key 弱引用，value 不是
+
+    const wm = new WeakMap();
+    let key = {};
+    let obj = {foo: 1};
+
+    wm.set(key, obj);
+    obj = null;
+    wm.get(key)
+    // Object {foo: 1}
 
 #### 关于 Map 的应用
 
