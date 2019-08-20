@@ -103,7 +103,96 @@ comments: false
 
 Proxy 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种元编程，即对编程语言进行编程
 
-Proxy 可以理解成，在目标对象之间架设一层拦截，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写，可以译为代理器
+Proxy 可以理解成，在目标对象之间架设一层拦截，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写，可以译为代理
 
+### get()
 
+```
+var person = {
+  name: "张三"
+};
 
+var proxy = new Proxy(person, {
+  get: function(target, property) {
+    if (property in target) {
+      return target[property];
+    } else {
+      throw new ReferenceError("Property \"" + property + "\" does not exist.");
+    }
+  }
+});
+
+proxy.name // "张三"
+proxy.age // 抛出一个错误
+```
+
+### set()
+
+```
+let validator = {
+  set: function(obj, prop, value) {
+    if (prop === 'age') {
+      if (!Number.isInteger(value)) {
+        throw new TypeError('The age is not an integer');
+      }
+      if (value > 200) {
+        throw new RangeError('The age seems invalid');
+      }
+    }
+
+    // 对于满足条件的 age 属性以及其他属性，直接保存
+    obj[prop] = value;
+  }
+};
+
+let person = new Proxy({}, validator);
+
+person.age = 100;
+
+person.age // 100
+person.age = 'young' // 报错
+person.age = 300 // 报错
+```
+
+### apply()
+
+```
+var twice = {
+  apply (target, ctx, args) {
+    return Reflect.apply(...arguments) * 2;
+  }
+};
+function sum (left, right) {
+  return left + right;
+};
+var proxy = new Proxy(sum, twice);
+proxy(1, 2) // 6
+proxy.call(null, 5, 6) // 22
+proxy.apply(null, [7, 8]) // 30
+```
+
+### 实现 web 服务的客户端
+
+Proxy 对象可以拦截目标对象的任意属性，这使得它很适合来写 web 服务的客户端
+
+```
+const service = createWebService('http://example.com/data')
+
+service.employees().then(json => {
+  const emplyees = JSON.parse(json)
+  ...
+})
+```
+
+上面的代码新建了一个 web 服务的端口，这个接口返回各种数据。Proxy 可以拦截这个对象的任意属性，所以不用为每一种数据写一个适配方法，只要写一个 proxy 拦截就好了
+
+```
+function createWebService(baseUrl) {
+  return new Proxy({}, {
+    get(target, propKey, receiver) {
+      return () => httpGet(baseUrl+'/'+propKey)
+    }
+  })
+}
+```
+**这个例子也演示了get返回函数的操作**
