@@ -2,7 +2,7 @@
 title: ES6之Promise用法
 date: 2019-08-11 13:58:55
 categories: js
-tags: [ES6, G]
+tags: [es6, G]
 comments: false
 ---
 

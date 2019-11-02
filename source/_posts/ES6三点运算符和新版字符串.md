@@ -2,7 +2,7 @@
 title: ES6 三点运算符和新版字符串
 date: 2019-08-04 16:06:54
 categories: js
-tags: [ES6, G]
+tags: [es6, G]
 comments: false
 ---
 

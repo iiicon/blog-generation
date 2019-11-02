@@ -2,7 +2,7 @@
 title: ES6之let和const
 date: 2019-07-30 23:11:13
 categories: js
-tags: [ES6, G]
+tags: [es6, G]
 comments: false
 ---
 

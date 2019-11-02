@@ -2,7 +2,7 @@
 title: ES6新增的数据类型
 date: 2019-08-11 23:14:39
 categories: js
-tags: [ES6, G]
+tags: [es6, G]
 comments: false
 ---
 

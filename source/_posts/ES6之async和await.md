@@ -2,7 +2,7 @@
 title: ES6之async和await
 date: 2019-08-12 23:28:36
 categories: js
-tags: [ES6, G]
+tags: [es6, G]
 comments: false
 ---
 

@@ -2,7 +2,7 @@
 title: ES6自己实现简易promise
 date: 2019-08-19 11:12:16
 categories: js
-tags: [ES6, G]
+tags: [es6, G]
 comments: false
 ---
 

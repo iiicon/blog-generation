@@ -1,7 +1,7 @@
 ---
 title: ES6
 date: 2017-10-04 17:45:13
-tags: [ES6]
+tags: [es6]
 categories: js
 comments: false
 ---
@@ -9,7 +9,7 @@ comments: false
 最近用hexo搭建了一个博客，采用next主题，用来记录自己工作学习生活的点点滴滴
 正好想巩固一下es6的基础知识，好了，现在开始
 
-![ES6 Screenshot](http://oxb2vhvil.bkt.clouddn.com/es6-logo.jpg)
+![es6 Screenshot](http://oxb2vhvil.bkt.clouddn.com/es6-logo.jpg)
 
 ## 解构赋值
 > 数据解构 对象解构

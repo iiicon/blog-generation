@@ -2,7 +2,7 @@
 title: ES6新增api
 date: 2019-08-13 22:51:08
 categories: js
-tags: [Array, ES6, G]
+tags: [Array, es6, G]
 comments: false
 ---
 

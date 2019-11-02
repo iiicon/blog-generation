@@ -2,7 +2,7 @@
 title: ES6对象扩展
 date: 2019-08-05 00:11:22
 categories: js
-tags: [ES6, G]
+tags: [es6, G]
 comments: false
 ---
 

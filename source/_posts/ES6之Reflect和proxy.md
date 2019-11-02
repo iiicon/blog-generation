@@ -2,7 +2,7 @@
 title: ES6之Reflect和proxy
 date: 2019-08-16 15:32:54
 categories: js
-tags: [ES6, G]
+tags: [es6, G]
 comments: false
 ---
 

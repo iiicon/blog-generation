@@ -2,7 +2,7 @@
 title: ES6箭头函数
 date: 2019-07-31 23:27:32
 categories: js
-tags: [ES6, G]
+tags: [es6, G]
 comments: false
 ---
 
