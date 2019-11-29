@@ -2,7 +2,7 @@
 title: web性能优化（一）
 date: 2019-04-23 22:03:32
 tags: [G, 性能优化]
-categories: web 优化
+categories: web 性能
 ---
 
 ### css
