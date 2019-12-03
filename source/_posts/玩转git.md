@@ -2,7 +2,7 @@
 title: 玩转git
 date: 2019-08-13 18:00:57
 categories: 工具
-tags: [command, G]
+tags: [command]
 comments: false
 ---
 
