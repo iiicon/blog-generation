@@ -4,15 +4,15 @@
 
 # Site
 title: 一个没有情趣和色彩的人
-subtitle: 认真的人才有资格开玩笑
+subtitle: 正经点 少说话
 description: coding note and life perception 代码笔记和生活感悟
 author: iiicon
-language: en
 timezone: Asia/Shanghai
+language: [zh-Hans, en]
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://sgw.wiki
+url: https://sgw.wiki
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults: en
@@ -43,7 +43,7 @@ highlight:
   line_number: true
   auto_detect: false
   tab_replace:
-  
+
 # Home page setting
 # path: Root path for your blogs index page. (default = '')
 # per_page: Posts displayed per page. (0 = disable pagination)
@@ -52,7 +52,7 @@ index_generator:
   path: ''
   per_page: 10
   order_by: -date
-  
+
 # Category & Tag
 default_category: uncategorized
 category_map:
