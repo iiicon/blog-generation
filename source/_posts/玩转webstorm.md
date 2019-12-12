@@ -18,3 +18,4 @@ categories: 工具
 - `ctrl e` 打开文件
 - `ctrl shift f10` run
 - `ctrl shift f8` 查看断点
+- `ctrl r` 查找替换
