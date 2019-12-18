@@ -142,6 +142,7 @@ let add: Add = function(a, b) {
 ### 这个函数的属性也是函数
 
 ```
+第一种
 interface Add {
   (a: number, b: number): number
   // minus(c: number, d: number): number
@@ -156,6 +157,17 @@ let add: Add = ((): Add => {
   }
   return x
 })()
+```
+
+```
+第二种
+class Adds {
+   minus(c: number, d: number): number
+}
+interface Add extends Adds {
+  (a: number, b: number): number
+  
+}
 ```
 
 ### interface 的对象是一个数组
