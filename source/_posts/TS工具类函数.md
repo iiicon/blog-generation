@@ -1,5 +1,5 @@
 ---
-title: js工具类函数
+title: TS工具类函数
 date: 2019-12-20 11:15:12
 tags: [code]
 categories: js-code
