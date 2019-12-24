@@ -80,6 +80,17 @@ indexOf('o', 6) 6 是开始的位置, 返回一个字符串在另一个字符串
 'a|b|c'.split('|', 4) // ['a', 'b', 'c']
 ```
 
+#### repeat
+
+构造并返回一个新字符串，该字符串包含被连接在一起的指定数量的字符串的副本。
+
+```
+"abc".repeat(0)      // ""
+"abc".repeat(1)      // "abc"
+"abc".repeat(2)      // "abcabc"
+"abc".repeat(3.5)    // "abcabcabc" 参数count将会被自动转换成整数.
+```
+
 #### localeCompare
 
 比较两个字符的长度，转成 unicode 判断
