@@ -19,3 +19,4 @@ categories: 工具
 - `ctrl shift f10` run
 - `ctrl shift f8` 查看断点
 - `ctrl r` 查找替换
+- `ctrl shift n` 查找文件
