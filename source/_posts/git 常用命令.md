@@ -39,3 +39,5 @@ comments: false
 `git push -f origin develop`  git 强制提交
 
 `git push -u orgin dev` git 设置上游 --set-upstream
+
+`git config core.ignorecase false` windows 设置大小写敏感
