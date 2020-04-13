@@ -120,6 +120,15 @@ const mapDispatchToProps = {
 
 这就是 react-redux 的使用，感叹 vuex 帮我们做了太多东西，有点香 XD
 
+
+```js
+contextType // 一个 context 的时候可以使用
+
+static contextType = ssContext
+const xx = this.context
+这样可以不用 consumer 解析
+```
+
 ### 代码仓库
 
 [react-redux](https://github.com/iiicon/react-demo-advance/blob/master/src/pages/RA6/index.jsx)
