@@ -2,7 +2,7 @@
 title: git 常用命令
 date: 2018-11-25 18:47:11
 categories: 工具
-tags: [command, G]
+tags: [command, G, git]
 comments: false
 ---
 

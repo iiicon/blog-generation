@@ -2,7 +2,7 @@
 title: git撤销node_modules
 date: 2019-03-24 22:09:00
 categories: 工具
-tags: [command, G]
+tags: [command, G, git]
 comments: false
 ---
 
