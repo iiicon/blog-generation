@@ -18,7 +18,9 @@ comments: false
 
 `git log` 查看变更历史
 
-`git pull` 
+`git fetch origin master` 从远程把别人的代码拉下来
+
+`git pull` 就是 `git fetch and git merge` 的合并操作
 
 `git push`
 
@@ -41,3 +43,6 @@ comments: false
 `git push -u orgin dev` git 设置上游 --set-upstream
 
 `git config core.ignorecase false` windows 设置大小写敏感
+
+
+
