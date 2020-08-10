@@ -33,6 +33,14 @@ comments: false
 
 ### Set
 
+Set 函数可以接受一个数组，(或者具有 iterable 接口的其他数据结构)，作为参数用来初始化
+
+操作方法有 `add delete has(value) clear` 方法
+
+遍历可以用 `keys values entires forEach`
+
+属性 size 返回实例成员的总数
+
 > Set 对象允许你存储任何类型的唯一值，无论是原始值或者是对象引用。
 > Set 对象是值的集合，你可以按照插入的顺序迭代它的元素。 Set 中的元素只会出现一次，即 Set 中的元素是唯一的。
 
@@ -105,7 +113,7 @@ comments: false
         ['name', 'xxx'],
         ['age', 18]
     ])
-    
+
     // 实际上是下面这个操作
     const map = new Map();
 
@@ -124,6 +132,21 @@ Map 的方法基本和 Set 一样
 
 > WeakMap 对象是一组键/值对的集合，其中的键是弱引用的。其键必须是对象，而值可以是任意的。
 > 原生的 WeakMap 持有的是每个键或值对象的“弱引用”，这意味着在没有其他引用存在时垃圾回收能正确进行。原生 WeakMap 的结构是特殊且有效的，其用于映射的 key 只有在其没有被回收时才是有效的。
+
+### 用法
+
+```js
+const wm = new WeakMap();
+let key = new Array(5 * 1024 * 1024);
+wm.set(key, 1);
+key = null;
+```
+
+当我们设置 `wm.set(key, 1)` 时，其实建立了 `wm` 对 `key` 所引用的对象的弱引用，但因为 `let key = new Array(5 * 1024 * 1024)` 建立了 `key` 对所引用对象的强引用，被引用的对象并不会被回收，但是当我们设置 `key = null` 的时候，就只有 `wm` 对所引用对象的弱引用，下次垃圾回收机制执行的时候，该引用对象就会被回收掉。
+
+**WeakMap 可以帮你省掉手动删除对象关联数据的步骤，所以当你不能或者不想控制关联数据的生命周期时就可以考虑使用 WeakMap。**
+
+WeakMap 只接受对象作为键名
 
 同样它也是不可枚举的，有四个 api
 
@@ -145,6 +168,63 @@ Map 的方法基本和 Set 一样
     wm.get(key)
     // Object {foo: 1}
 
-#### 关于 Map 的应用
+### 关于 Map 的应用
 
-[http://www.ruanyifeng.com/blog/2017/04/memory-leak.html](http://www.ruanyifeng.com/blog/2017/04/memory-leak.html)
+1. 在 DOM 对象上保存相关数据
+   传统使用 jQuery 的时候，我们会通过 $.data() 方法在 DOM 对象上储存相关信息(就比如在删除按钮元素上储存帖子的 ID 信息)，jQuery 内部会使用一个对象管理 DOM 和对应的数据，当你将 DOM 元素删除，DOM 对象置为空的时候，相关联的数据并不会被删除，你必须手动执行 $.removeData() 方法才能删除掉相关联的数据，WeakMap 就可以简化这一操作：
+
+```js
+let wm = new WeakMap(),
+  element = document.querySelector(".element");
+wm.set(element, "data");
+
+let value = wm.get(elemet);
+console.log(value); // data
+
+element.parentNode.removeChild(element);
+element = null;
+```
+
+2. 数据缓存
+   从上一个例子，我们也可以看出，当我们需要关联对象和数据，比如在不修改原有对象的情况下储存某些属性或者根据对象储存一些计算的值等，而又不想管理这些数据的死活时非常适合考虑使用 WeakMap。数据缓存就是一个非常好的例子：
+
+```js
+const cache = new WeakMap();
+function countOwnKeys(obj) {
+  if (cache.has(obj)) {
+    console.log("Cached");
+    return cache.get(obj);
+  } else {
+    console.log("Computed");
+    const count = Object.keys(obj).length;
+    cache.set(obj, count);
+    return count;
+  }
+}
+```
+
+3. 私有属性
+   WeakMap 也可以被用于实现私有变量，不过在 ES6 中实现私有变量的方式有很多种，这只是其中一种：
+
+```js
+const privateData = new WeakMap();
+
+class Person {
+  constructor(name, age) {
+    privateData.set(this, { name: name, age: age });
+  }
+
+  getName() {
+    return privateData.get(this).name;
+  }
+
+  getAge() {
+    return privateData.get(this).age;
+  }
+}
+
+export default Person;
+```
+
+4. 更多
+   [http://www.ruanyifeng.com/blog/2017/04/memory-leak.html](http://www.ruanyifeng.com/blog/2017/04/memory-leak.html)
