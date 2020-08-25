@@ -1,5 +1,5 @@
 ---
-title: vue3源码阅读笔记
+title: vue3 源码阅读笔记
 date: 2020-08-20 10:03:35
 tags: [vue, 笔记]
 categories: vue
@@ -136,28 +136,26 @@ mount(rootContainer) {
 标准的跨平台渲染流程是先创建 vnode，再渲染 vnode。此外参数 rootContainer 也可以是不同类型的值，也就是这里是通用的渲染逻辑，
 来完善 Web 平台下的渲染逻辑
 
-```
+```js
 app.mount = (containerOrSelector) => {
   // 标准化容器
-  const container = normalizeContainer(containerOrSelector)
-  if (!container)
-    return
-  const component = app._component
-   // 如组件对象没有定义 render 函数和 template 模板，则取容器的 innerHTML 作为组件模板内容
+  const container = normalizeContainer(containerOrSelector);
+  if (!container) return;
+  const component = app._component;
+  // 如组件对象没有定义 render 函数和 template 模板，则取容器的 innerHTML 作为组件模板内容
   if (!isFunction(component) && !component.render && !component.template) {
-    component.template = container.innerHTML
+    component.template = container.innerHTML;
   }
   // 挂载前清空容器内容
-  container.innerHTML = ''
+  container.innerHTML = "";
   // 真正的挂载
-  return mount(container)
-}
-
+  return mount(container);
+};
 ```
 
 app.mount 就是 重写的 mount 方法，传入 container 参数，先标准化容器，然后取出 rootComponent，
 如组件对象没有定义 render 函数和 template 模板，则取容器的 innerHTML 作为组件模板内容，
-在挂载钱清空容器内容，然后执行通用的 mount 方法
+在挂载前清空容器内容，然后执行通用的 mount 方法
 
 ### 核心渲染流程：创建 vnode 和渲染 vnode
 
@@ -176,9 +174,9 @@ vnode 有组件 vnode，普通元素 vnode，注释 vnode，文本 vnode
 ```js
 const vnode = createVNode(rootComponent, rootProps);
 ```
+
 ```js
-function createVNode(type, props = null
-,children = null) {
+function createVNode(type, props = null, children = null) {
   if (props) {
     // 处理 props 相关逻辑，标准化 class 和 style
   }
@@ -186,24 +184,304 @@ function createVNode(type, props = null
   const shapeFlag = isString(type)
     ? 1 /* ELEMENT */
     : isSuspense(type)
-      ? 128 /* SUSPENSE */
-      : isTeleport(type)
-        ? 64 /* TELEPORT */
-        : isObject(type)
-          ? 4 /* STATEFUL_COMPONENT */
-          : isFunction(type)
-            ? 2 /* FUNCTIONAL_COMPONENT */
-            : 0
+    ? 128 /* SUSPENSE */
+    : isTeleport(type)
+    ? 64 /* TELEPORT */
+    : isObject(type)
+    ? 4 /* STATEFUL_COMPONENT */
+    : isFunction(type)
+    ? 2 /* FUNCTIONAL_COMPONENT */
+    : 0;
   const vnode = {
     type,
     props,
     shapeFlag,
     // 一些其他属性
-  }
+  };
   // 标准化子节点，把不同数据类型的 children 转成数组或者文本类型
-  normalizeChildren(vnode, children)
-  return vnode
+  normalizeChildren(vnode, children);
+  return vnode;
 }
-
 ```
+
 可以看出 createVnode 就是对 props 做标准化处理、对 vnode 的类型信息编码、创建 vnode 对象，标准化子节点 children，返回 vnode
+
+#### 渲染 vnode
+
+在 app.mount 内部通过 render(vnode, rootContainer) 去渲染组件
+
+```js
+render(vnode, rootContainer);
+const render = (vnode, container) => {
+  if (vnode == null) {
+    // 销毁组件
+    if (container._vnode) {
+      unmount(container._vnode, null, null, true);
+    }
+  } else {
+    // 创建或者更新组件
+    patch(container._vnode || null, vnode, container);
+  }
+  // 缓存 vnode 节点，表示已经渲染
+  container._vnode = vnode;
+};
+```
+
+通过 vnode 判断去执行卸载还是创建或更新，接下来看 patch
+
+```js
+const patch = (
+  n1,
+  n2,
+  container,
+  anchor = null,
+  parentComponent = null,
+  parentSuspense = null,
+  isSVG = false,
+  optimized = false
+) => {
+  // 如果存在新旧节点, 且新旧节点类型不同，则销毁旧节点
+  if (n1 && !isSameVNodeType(n1, n2)) {
+    anchor = getNextHostNode(n1);
+    unmount(n1, parentComponent, parentSuspense, true);
+    n1 = null;
+  }
+  const { type, shapeFlag } = n2;
+  switch (type) {
+    case Text:
+      // 处理文本节点
+      break;
+    case Comment:
+      // 处理注释节点
+      break;
+    case Static:
+      // 处理静态节点
+      break;
+    case Fragment:
+      // 处理 Fragment 元素
+      break;
+    default:
+      if (shapeFlag & 1 /* ELEMENT */) {
+        // 处理普通 DOM 元素
+        processElement(
+          n1,
+          n2,
+          container,
+          anchor,
+          parentComponent,
+          parentSuspense,
+          isSVG,
+          optimized
+        );
+      } else if (shapeFlag & 6 /* COMPONENT */) {
+        // 处理组件
+        processComponent(
+          n1,
+          n2,
+          container,
+          anchor,
+          parentComponent,
+          parentSuspense,
+          isSVG,
+          optimized
+        );
+      } else if (shapeFlag & 64 /* TELEPORT */) {
+        // 处理 TELEPORT
+      } else if (shapeFlag & 128 /* SUSPENSE */) {
+        // 处理 SUSPENSE
+      }
+  }
+};
+```
+
+我们重点关注对组件的处理和对普通 dom 元素的处理
+先看对组件的处理
+
+```js
+const processComponent = (
+  n1,
+  n2,
+  container,
+  anchor,
+  parentComponent,
+  parentSuspense,
+  isSVG,
+  optimized
+) => {
+  if (n1 == null) {
+    // 挂载组件
+    mountComponent(
+      n2,
+      container,
+      anchor,
+      parentComponent,
+      parentSuspense,
+      isSVG,
+      optimized
+    );
+  } else {
+    // 更新组件
+    updateComponent(n1, n2, parentComponent, optimized);
+  }
+};
+```
+
+mountComponent 就做三件事情
+
+```js
+const mountComponent = (
+  initialVNode,
+  container,
+  anchor,
+  parentComponent,
+  parentSuspense,
+  isSVG,
+  optimized
+) => {
+  // 创建组件实例
+  const instance = (initialVNode.component = createComponentInstance(
+    initialVNode,
+    parentComponent,
+    parentSuspense
+  ));
+  // 设置组件实例
+  setupComponent(instance);
+  // 设置并运行带副作用的渲染函数
+  setupRenderEffect(
+    instance,
+    initialVNode,
+    container,
+    anchor,
+    parentSuspense,
+    isSVG,
+    optimized
+  );
+};
+```
+
+组件的创建不像 2.0 去实例化组件，内部通过返回对象创建，接着是设置组件实例，保留了很多组件相关的数据，维护了组件的上下文，包括对 props，插槽，以及其他实例的属性的初始化处理，最后是运行带副作用的渲染函数 `setupRenderEffect`
+
+```js
+const setupRenderEffect = (
+  instance,
+  initialVNode,
+  container,
+  anchor,
+  parentSuspense,
+  isSVG,
+  optimized
+) => {
+  // 创建响应式的副作用渲染函数
+  instance.update = effect(function componentEffect() {
+    if (!instance.isMounted) {
+      // 渲染组件生成子树 vnode
+      const subTree = (instance.subTree = renderComponentRoot(instance));
+      // 把子树 vnode 挂载到 container 中
+      patch(null, subTree, container, anchor, instance, parentSuspense, isSVG);
+      // 保留渲染生成的子树根 DOM 节点
+      initialVNode.el = subTree.el;
+      instance.isMounted = true;
+    } else {
+      // 更新组件
+    }
+  }, prodEffectOptions);
+};
+```
+
+该函数利用响应式库的 effect 函数创建了一个副作用渲染函数 componentEffect ,当组件的数据发生变化时，effect 函数包裹的内部渲染函数 componentEffect 会重新执行一遍，从而达到重新渲染组件的目的。
+
+先分析初始渲染
+
+**初始渲染主要做两件事情：渲染组件生成 subTree、把 subTree 挂载到 container 中**
+
+`initialVnode` 就是 `组件 vnode`，`subTree` 就是 `子树 vnode` 执行 `renderComponentRoot` 生成
+
+我们知道每个组件都会有对应的 `render` 函数，即使你写 `template`，也会编译成 `render` 函数，而 `renderComponentRoot` 函数就是去执行 `render` 函数创建整个组件树内部的 `vnode`，把这个 `vnode` 再经过内部一层标准化，就得到了该函数的返回结果：子树 vnode。
+
+渲染成子树 `vnode` 后，接下来就是继续调用 `patch` 函数把子树 `vnode` 挂载到 `container` 中
+
+又回到 `patch` 函数，会继续对这个子树的 `vnode` 类型进行判断，如果是 `div` 就对应的是 `普通元素 vnode`，
+就会处理普通 dom 执行 `processElement` 函数
+
+```js
+const processElement = (
+  n1,
+  n2,
+  container,
+  anchor,
+  parentComponent,
+  parentSuspense,
+  isSVG,
+  optimized
+) => {
+  isSVG = isSVG || n2.type === "svg";
+  if (n1 == null) {
+    //挂载元素节点
+    mountElement(
+      n2,
+      container,
+      anchor,
+      parentComponent,
+      parentSuspense,
+      isSVG,
+      optimized
+    );
+  } else {
+    //更新元素节点
+    patchElement(n1, n2, parentComponent, parentSuspense, isSVG, optimized);
+  }
+};
+```
+
+接下来看 mountComponent 的逻辑
+
+```js
+const mountElement = (
+  vnode,
+  container,
+  anchor,
+  parentComponent,
+  parentSuspense,
+  isSVG,
+  optimized
+) => {
+  let el;
+  const { type, props, shapeFlag } = vnode;
+  // 创建 DOM 元素节点
+  el = vnode.el = hostCreateElement(vnode.type, isSVG, props && props.is);
+  if (props) {
+    // 处理 props，比如 class、style、event 等属性
+    for (const key in props) {
+      if (!isReservedProp(key)) {
+        hostPatchProp(el, key, null, props[key], isSVG);
+      }
+    }
+  }
+  if (shapeFlag & 8 /* TEXT_CHILDREN */) {
+    // 处理子节点是纯文本的情况
+    hostSetElementText(el, vnode.children);
+  } else if (shapeFlag & 16 /* ARRAY_CHILDREN */) {
+    // 处理子节点是数组的情况
+    mountChildren(
+      vnode.children,
+      el,
+      null,
+      parentComponent,
+      parentSuspense,
+      isSVG && type !== "foreignObject",
+      optimized || !!vnode.dynamicChildren
+    );
+  }
+  // 把创建的 DOM 元素节点挂载到 container 上
+  hostInsert(el, container, anchor);
+};
+```
+
+可以看到，挂载元素函数主要做四件事情，创建 `DOM` 元素节点，处理 `props`，处理 `children`，挂载 `DOM` 到 container 上
+
+渲染完 `subTree` 之后，就会执行 `componentEffect` 函数中的剩余逻辑
+
+```js
+initialVNode.el = subTree.el;
+instance.isMounted = true;
+```
