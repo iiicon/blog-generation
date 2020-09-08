@@ -380,7 +380,7 @@ declare type Route = {
 
 `this.matcher` 就是在 `VueRouter` 实例化通过 `createMatcher` 创建的, `createMathcer` 接受两个参数，一个是 `routes`，一个是 `router` 实例
 
-createMatcher 首先执行`const { pathList, pathMap, nameMap } = createRouteMap(routes)`创建路由映射表
+createMatcher 首先执行`const { pathList, pathMap, nameMap } = createRouteMap(routes)` 创建路由映射表
 
 ```js
 export function createRouteMap(
@@ -423,4 +423,131 @@ export function createRouteMap(
 
 `createRouteMap` 把路由映射表分成三部分，`pathList` 存储所有的 `path`，`pathMap` 表示 `path` 到 `routeRecord` 的映射关系，`nameMap` 表示 `name` 到 `routeRecord` 的映射关系
 
+```js
+declare type RouteRecord = {
+  path: string,
+  regex: RouteRegExp,
+  components: Dictionary<any>,
+  instances: Dictionary<any>,
+  name: ?string,
+  parent: ?RouteRecord,
+  redirect: ?RedirectOption,
+  matchAs: ?string,
+  beforeEnter: ?NavigationGuard,
+  meta: any,
+  props: boolean | Object | Function | Dictionary<boolean | Object | Function>,
+};
+```
 
+`routeRecord` 就是 `addRouteRecord` 执行生成的，它遍历 `routes` 为每一个 `route` 执行 `addRouteRecord` 生成一条记录，然后用 `pathList` `pathMap` `nameMap` 管理起来
+创建的 routeRecord 如下
+
+```js
+const record: RouteRecord = {
+  path: normalizedPath,
+  regex: compileRouteRegex(normalizedPath, pathToRegexpOptions),
+  components: route.components || { default: route.component },
+  instances: {},
+  name,
+  parent,
+  matchAs,
+  redirect: route.redirect,
+  beforeEnter: route.beforeEnter,
+  meta: route.meta || {},
+  props:
+    route.props == null
+      ? {}
+      : route.components
+      ? route.props
+      : { default: route.props },
+};
+```
+
+`path` 是规范化后的路径，`regex` 是一个正则的扩展，解析`url`，`components` 对应 `{default: route.component}`，instances 是组件实例，`parent` 是父的 `routeRecord`，因为我们一般也会配置子路由，所以 `RouteRecord` 也是一个树形结构
+
+```js
+if (route.children) {
+  // ...
+  route.children.forEach((child) => {
+    const childMatchAs = matchAs
+      ? cleanPath(`${matchAs}/${child.path}`)
+      : undefined;
+    addRouteRecord(pathList, pathMap, nameMap, child, record, childMatchAs);
+  });
+}
+```
+
+递归执行 `addRouteRecord` 的时候把当前 `child` 作为 `parent` 参数传入，这样深度遍历，我们就能拿到 `route` 的全部记录
+
+因为 `pathList` `pathMap` `nameMap` 都是引用类型，所以我们会把所有的数据都统计到，经过 `createRouteMap` 的执行，我们会得到 `pathList pathMap nameMap`，有所有的` path`，以及对应的 `routeRecord`
+
+回到 `createMatcher`，创建完路由映射表之后，定义一些方法，最后返回 `{ match, addRoutes }`
+
+```js
+function addRoutes(routes) {
+  createRouteMap(routes, pathList, pathMap, nameMap);
+}
+```
+
+`addRoutes` 方法的作用就是动态添加路由，调用 `createRouteMap` 传入新的 `routes`
+
+`match` 函数接受 3 个参数，`raw` 是 `rawLocation` 类型，它可以是一个 `url` 字符串，也可以是一个 `Location` 对象，`currentRoute` 是 `route` 类型，表示当前的路径，`redirectFrom` 和重定向相关，
+`match` 方法就是接受一个 `raw` 和当前的 `currentRoute` 计算出一个新的路径并返回
+
+```js
+function match(
+  raw: RawLocation,
+  currentRoute?: Route,
+  redirectedFrom?: Location
+): Route {
+  const location = normalizeLocation(raw, currentRoute, false, router);
+  const { name } = location;
+
+  if (name) {
+    const record = nameMap[name];
+    if (process.env.NODE_ENV !== "production") {
+      warn(record, `Route with name '${name}' does not exist`);
+    }
+    if (!record) return _createRoute(null, location);
+    const paramNames = record.regex.keys
+      .filter((key) => !key.optional)
+      .map((key) => key.name);
+
+    if (typeof location.params !== "object") {
+      location.params = {};
+    }
+
+    if (currentRoute && typeof currentRoute.params === "object") {
+      for (const key in currentRoute.params) {
+        if (!(key in location.params) && paramNames.indexOf(key) > -1) {
+          location.params[key] = currentRoute.params[key];
+        }
+      }
+    }
+
+    if (record) {
+      location.path = fillParams(
+        record.path,
+        location.params,
+        `named route "${name}"`
+      );
+      return _createRoute(record, location, redirectedFrom);
+    }
+  } else if (location.path) {
+    location.params = {};
+    for (let i = 0; i < pathList.length; i++) {
+      const path = pathList[i];
+      const record = pathMap[path];
+      if (matchRoute(record.regex, location.path, location.params)) {
+        return _createRoute(record, location, redirectedFrom);
+      }
+    }
+  }
+
+  return _createRoute(null, location);
+}
+```
+
+首先执行 `normalizeLocation` 方法，根据 `raw` `current` 计算出新的 `location`，他主要处理了两种情况，一种是有 `params` 且没有 `path`，一种是有 `path` 的，对于第一种情况，如果 `current` 有 `name`, 计算出的 `location` 也有 `name`。`normalizeLocation` 返回 `{_normalized: true, path, query, hash}`
+
+计算出 `location` 后，对 `location` 的 `name` 和 `path` 做了处理
