@@ -444,7 +444,7 @@ declare type RouteRecord = {
 
 ```js
 const record: RouteRecord = {
-  path: normalizedPath,
+  path: normalizedPath, // cleanPath(`${parent.path}/${path}`)
   regex: compileRouteRegex(normalizedPath, pathToRegexpOptions),
   components: route.components || { default: route.component },
   instances: {},
@@ -463,7 +463,7 @@ const record: RouteRecord = {
 };
 ```
 
-`path` 是规范化后的路径，`regex` 是一个正则的扩展，解析`url`，`components` 对应 `{default: route.component}`，instances 是组件实例，`parent` 是父的 `routeRecord`，因为我们一般也会配置子路由，所以 `RouteRecord` 也是一个树形结构
+`path` 是规范化后的路径，`regex` 是一个正则的扩展 解析`url`，`components` 对应 `{default: route.component}`，instances 是组件实例，`parent` 是父的 `routeRecord`，因为我们一般也会配置子路由，所以 `RouteRecord` 也是一个树形结构
 
 ```js
 if (route.children) {
@@ -550,4 +550,44 @@ function match(
 
 首先执行 `normalizeLocation` 方法，根据 `raw` `current` 计算出新的 `location`，他主要处理了两种情况，一种是有 `params` 且没有 `path`，一种是有 `path` 的，对于第一种情况，如果 `current` 有 `name`, 计算出的 `location` 也有 `name`。`normalizeLocation` 返回 `{_normalized: true, path, query, hash}`
 
-计算出 `location` 后，对 `location` 的 `name` 和 `path` 做了处理
+计算出 `location` 后，对 `location` 的 `name` 和 `path` 的两种情况做了处理
+有 `name` 情况根据 `nameMap` 匹配到 `record`，它是一个 `RouteRecord` 对象，如果 `record` 不存在，则匹配失败，返回一个空路径。然后拿到 `record` 对应的 `paramNames`，再对比 `currentRoute` 中的 `params`，把交集部分添加到 `location` 中，然后再通过 `fillParams` 方法根据 `record.path` 计算出 `location.path`，最后调用 `_createRoute(record, location, redirectedFrom)` 去生成一条新路径
+
+通过 `name` 我们可以很快找到 `record`，但是通过 `path` 并不能，因为我们计算后的 `location.path` 是一个真实路径，而 `record` 中的 `path` 可能会有 `param`，因此需要对所有的 `pathList` 做顺序遍历，然后通过 `matchRoute` 方法根据 `record.regex location.path location.params` 匹配，如果匹配到就通过 `_createRoute(record, location, redirectedFrom)` 去生成一条新路径。
+
+```js
+function _createRoute(
+  record: ?RouteRecord,
+  location: Location,
+  redirectedFrom?: Location
+): Route {
+  if (record && record.redirect) {
+    return redirect(record, redirectedFrom || location);
+  }
+  if (record && record.matchAs) {
+    return alias(record, location, record.matchAs);
+  }
+  return createRoute(record, location, redirectedFrom, router);
+}
+```
+
+`createRoute` 可以根据 `record` 和 `location` 创建出一条 `route` 路径，`vue-router` 中所有的路径都是通过 `createRoute` 函数创建，并且是 `freeze` 不可被外部修改的，`Route` 最终都会有一个特别重要的属性 `matched`，它通过 `formatMatch` 计算而来
+
+```js
+function formatMatch(record: ?RouteRecord): Array<RouteRecord> {
+  const res = [];
+  while (record) {
+    res.unshift(record);
+    record = record.parent;
+  }
+  return res;
+}
+```
+
+可以看它通过 `record` 循环向上找 `parent`，直到找到最外层，并把所有的 `record` 都 `push` 到一个数组中，最终返回的就是 `record` 数组，它记录了一条线路上的所有 `record`，`matched` 属性非常有用，它为之后渲染组件提供了依据
+
+## 路径切换
+
+## 问题
+
+1. 路由钩子为什么要bind
