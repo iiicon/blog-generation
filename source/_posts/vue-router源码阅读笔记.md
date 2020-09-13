@@ -1022,6 +1022,183 @@ data.registerRouteInstance = (vm, val) => {
 
 render 函数最后根据 component 渲染出对应的组件 vnode
 
+**那么当我们执行 transitionTo 来更改路由后，组件是如何渲染的呢？**
+
+在混入的 `beforeCreate` 钩子中我们吧 `this._route` 变为了响应式属性，我们在 渲染 r`outer-view` 的时候，会访问 `parent.$route`, 触发了 `getter`，相当于 `router-view` 对它有依赖，然后再执行完 `transitionTo` 后，修改 `app._route` 的时候又触发了 `setter`，因此会通知 `router-view` 的渲染 `watcher` 更新，重新渲染组件
+
+VueRotuer 还内置了 `router-link` 组件
+
+通过 to 属性指定目标地址，默认渲染成带有正确连接的 a 标签，可以通过 tag 生成别的标签，另外当路由成功激活时，链接元素自动设置一个表示激活的 css 类名
+
+```js
+export default {
+  name: 'RouterLink',
+  props: {
+    to: {
+      type: toTypes,
+      required: true
+    },
+    tag: {
+      type: String,
+      default: 'a'
+    },
+    exact: Boolean,
+    append: Boolean,
+    replace: Boolean,
+    activeClass: String,
+    exactActiveClass: String,
+    event: {
+      type: eventTypes,
+      default: 'click'
+    }
+  },
+  render(h: Function) {
+    const router = this.$router
+    const current = this.$route
+    const { location, route, href } = router.resolve(this.to, current, this.append)
+
+    const classes = {}
+    const globalActiveClass = router.options.linkActiveClass
+    const globalExactActiveClass = router.options.linkExactActiveClass
+    const activeClassFallback = globalActiveClass == null ? 'router-link-active' : globalActiveClass
+    const exactActiveClassFallback = globalExactActiveClass == null ? 'router-link-exact-active' : globalExactActiveClass
+    const activeClass = this.activeClass == null ? activeClassFallback : this.activeClass
+    const exactActiveClass = this.exactActiveClass == null ? exactActiveClassFallback : this.exactActiveClass
+    const compareTarget = location.path ? createRoute(null, location, null, router) : route
+
+    classes[exactActiveClass] = isSameRoute(current, compareTarget)
+    classes[activeClass] = this.exact ? classes[exactActiveClass] : isIncludedRoute(current, compareTarget)
+
+    const handler = e => {
+      if (guardEvent(e)) {
+        if (this.replace) {
+          router.replace(location)
+        } else {
+          router.push(location)
+        }
+      }
+    }
+
+    const on = { click: guardEvent }
+    if (Array.isArray(this.event)) {
+      this.event.forEach(e => {
+        on[e] = handler
+      })
+    } else {
+      on[this.event] = handler
+    }
+
+    const data: any = {
+      class: classes
+    }
+
+    if (this.tag === 'a') {
+      data.on = on
+      data.attrs = { href }
+    } else {
+      const a = findAnchor(this.$slots.default)
+      if (a) {
+        a.isStatic = false
+        const extend = _Vue.util.extend
+        const aData = (a.data = extend({}, a.data))
+        aData.on = on
+        const aAttrs = (a.data.attrs = extend({}, a.data.attrs))
+        aAttrs.href = href
+      } else {
+        data.on = on
+      }
+    }
+
+    return h(this.tag, data, this.$slots.default)
+  }
+}
+```
+
+`router.resolve` 函数执行
+先规范生成目标 `location`，再根据 `location` 和 `match` 通过 `this.match` 方法计算生成目标路径 `route`，然后再根据 `base、fullPath` 和 `this.mode` 通过 `createHref` 方法计算出最终跳转的 `href`
+
+```js
+resolve (
+  to: RawLocation,
+  current?: Route,
+  append?: boolean
+): {
+  location: Location,
+  route: Route,
+  href: string,
+  normalizedTo: Location,
+  resolved: Route
+} {
+  const location = normalizeLocation(
+    to,
+    current || this.history.current,
+    append,
+    this
+  )
+  const route = this.match(location, current)
+  const fullPath = route.redirectedFrom || route.fullPath
+  const base = this.history.base
+  const href = createHref(base, fullPath, this.mode)
+  return {
+    location,
+    route,
+    href,
+    normalizedTo: location,
+    resolved: route
+  }
+}
+
+function createHref (base: string, fullPath: string, mode) {
+  var path = mode === 'hash' ? '#' + fullPath : fullPath
+  return base ? cleanPath(base + '/' + path) : path
+}
+```
+
+解析完路由后 添加 activeClass 和 exactActiveClass
+
+接着创建了一个守卫函数
+
+```js
+const handler = e => {
+  if (guardEvent(e)) {
+    if (this.replace) {
+      router.replace(location)
+    } else {
+      router.push(location)
+    }
+  }
+}
+
+function guardEvent(e) {
+  if (e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) return
+  if (e.defaultPrevented) return
+  if (e.button !== undefined && e.button !== 0) return
+  if (e.currentTarget && e.currentTarget.getAttribute) {
+    const target = e.currentTarget.getAttribute('target')
+    if (/\b_blank\b/i.test(target)) return
+  }
+  if (e.preventDefault) {
+    e.preventDefault()
+  }
+  return true
+}
+
+const on = { click: guardEvent }
+if (Array.isArray(this.event)) {
+  this.event.forEach(e => {
+    on[e] = handler
+  })
+} else {
+  on[this.event] = handler
+}
+```
+
+最终会监听点击事件或者其它可以通过 `prop` 传入的事件类型，执行 `hanlder` 函数，最终执行 `router.push` 或者 r`outer.replace` 函数
+
+最后判断当前 `tag` 是否是 `<a>` 标签，`<router-link>` 默认会渲染成 `<a>` 标签，当然我们也可以修改 `tag` 的 `prop` 渲染成其他节点，这种情况下会尝试找它子元素的 `<a>` 标签，如果有则把事件绑定到 `<a>` 标签上并添加 `href` 属性，否则绑定到外层元素本身
+
+**路径变化是路由中最重要的功能，我们要记住以下内容：路由始终会维护当前的线路，路由切换的时候会把当前线路切换到目标线路，切换过程中会执行一系列的导航守卫钩子函数，会更改 url，同样也会渲染对应的组件，切换完毕后会把目标线路更新替换当前线路，这样就会作为下一次的路径切换的依据。**
+
 ## 问题
 
 1. 路由钩子为什么要 bind
