@@ -591,3 +591,5 @@ function formatMatch(record: ?RouteRecord): Array<RouteRecord> {
 ## 问题
 
 1. 路由钩子为什么要bind
+2. runQueue 异步，vm实例如何获取
+3. 
